@@ -35,7 +35,7 @@ export default function LoginPage() {
         email: email.trim(),
         password,
       });
-      setAuth(data.access_token, data.user);
+      setAuth(data.data.access_token, data.data.user);
       router.replace('/events');
     } catch (err: any) {
       const detail = err.response?.data?.detail;
