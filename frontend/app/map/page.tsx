@@ -28,7 +28,7 @@ export default function MapPage() {
 
   const fetchEvents = useCallback(async () => {
     try {
-      const data = await eventsApi.list();
+      const data = await eventsApi.list() as any;
       const arr = Array.isArray(data) ? data : [];
       const upcoming = arr.filter((e: Event) => new Date(e.event_datetime) >= new Date());
       setEvents(upcoming);

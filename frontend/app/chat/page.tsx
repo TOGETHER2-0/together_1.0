@@ -29,7 +29,7 @@ export default function ChatHubPage() {
     async function load() {
       try {
         // Prende tutti gli eventi — filtra quelli a cui sei iscritto
-        const events: any[] = await eventsApi.list();
+        const events: any[] = await eventsApi.list() as any;
         const approved = events.filter(ev =>
           ev.join_requests?.some(
             (r: any) => r.user?.id === user?.id && r.status === 'approved'
@@ -40,7 +40,7 @@ export default function ChatHubPage() {
         const previews = await Promise.all(
           approved.map(async (ev) => {
             try {
-              const msgs: any[] = await eventsApi.getMessages(ev.id);
+              const msgs: any[] = await eventsApi.getMessages(ev.id) as any;
               const last = Array.isArray(msgs) && msgs.length > 0
                 ? msgs[msgs.length - 1]
                 : null;
