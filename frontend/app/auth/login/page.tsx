@@ -34,8 +34,8 @@ export default function LoginPage() {
       const data = await authApi.login({
         email: email.trim(),
         password,
-      });
-      setAuth(data.data.access_token, data.data.user);
+      }) as any;
+      setAuth(data.access_token, data.user);
       router.replace('/events');
     } catch (err: any) {
       const detail = err.response?.data?.detail;

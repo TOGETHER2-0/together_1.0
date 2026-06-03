@@ -55,7 +55,7 @@ export default function RegisterPage() {
         email: formData.email,
         password: formData.password,
         faculty: formData.faculty,
-      });
+      }) as any;
       setAuth(data.access_token, data.user);
       router.replace('/events');
     } catch (err: any) {
