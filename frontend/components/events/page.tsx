@@ -61,7 +61,7 @@ export default function NewEventPage() {
         longitude: selected.longitude,
         max_participants: form.max_participants ? parseInt(form.max_participants) : null,
       };
-      const created = await eventsApi.create(payload);
+      const created = await eventsApi.create(payload) as any;
       router.push(`/events/${created.id}`);
     } catch (err: any) {
       const detail = err.response?.data?.detail;
