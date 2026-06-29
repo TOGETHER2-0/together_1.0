@@ -7,92 +7,106 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans:    ["'DM Sans'",  'system-ui', 'sans-serif'],
-        display: ["'Syne'",     "'DM Sans'", 'sans-serif'],
+        sans:    ['var(--font-geist-sans)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-geist-sans)', 'system-ui', 'sans-serif'],
       },
+
       colors: {
-        // Aligned to --brand-primary: #7C5CFC
         brand: {
-          50:  '#F3EEFF',
-          100: '#E4D8FF',
-          200: '#C9B3FF',
-          300: '#A88FFF',
-          400: '#9070FF',
-          500: '#7C5CFC',
-          600: '#6644E8',
-          700: '#5233CC',
-          800: '#3E25A8',
-          900: '#2C1A80',
+          50:  '#F7F4FA',
+          100: '#EDE5F5',
+          200: '#DACAEB',
+          300: '#BF9DD6',
+          400: '#A370BE',
+          500: '#6F2C91',   // JU primary
+          600: '#5D2579',
+          700: '#4D1D66',   // JU dark
+          800: '#3D1652',
+          900: '#2D0F3D',
         },
-        // Status colors — dark-mode aware (no zinc-50 on dark bg)
-        emerald: {
-          DEFAULT: '#00E5B3',
-          dim:     'rgba(0,229,179,0.12)',
-          border:  'rgba(0,229,179,0.25)',
-          text:    '#00C99C',
+        success: {
+          DEFAULT: '#00C49A',
+          bg:      'rgba(0,229,179,0.10)',
+          border:  'rgba(0,229,179,0.20)',
         },
-        rose: {
-          DEFAULT: '#FF5E7D',
-          dim:     'rgba(255,94,125,0.12)',
-          border:  'rgba(255,94,125,0.25)',
-        },
-        amber: {
+        warning: {
           DEFAULT: '#FFB547',
-          dim:     'rgba(255,181,71,0.12)',
-          border:  'rgba(255,181,71,0.25)',
+          bg:      'rgba(255,181,71,0.10)',
+          border:  'rgba(255,181,71,0.20)',
         },
-        // Surface palette mapped to CSS vars
+        danger: {
+          DEFAULT: '#FF5E7D',
+          bg:      'rgba(255,51,87,0.10)',
+          border:  'rgba(255,51,87,0.20)',
+        },
         surface: {
           base:     '#080810',
           card:     '#131320',
           elevated: '#181828',
         },
       },
-      borderRadius: {
-        'xs':  '8px',
-        'sm':  '12px',
-        'md':  '18px',
-        'lg':  '24px',
-        'xl':  '32px',
-        'pill':'9999px',
-        // Keep Tailwind defaults working too
-        '2xl': '1rem',
-        '3xl': '1.5rem',
-        '4xl': '2rem',
-      },
+
       spacing: {
-        // 8pt grid extras
-        '4.5': '18px',
-        '13':  '52px',
-        '15':  '60px',
-        '18':  '72px',
-        // Touch targets
-        'touch': '44px',
+        '4.5': '1.125rem',
+        '13':  '3.25rem',
+        '15':  '3.75rem',
+        '18':  '4.5rem',
+        '22':  '5.5rem',
       },
+
+      borderRadius: {
+        'xs':   '8px',
+        'sm':   '12px',
+        'md':   '18px',
+        'lg':   '24px',
+        'xl':   '32px',
+        'pill': '999px',
+      },
+
       fontSize: {
-        'xxs': ['10px',  { lineHeight: '14px', letterSpacing: '0.06em' }],
-        'xs':  ['12px',  { lineHeight: '16px' }],
-        'sm':  ['13px',  { lineHeight: '18px' }],
-        'base':['15px',  { lineHeight: '22px' }],
-        'md':  ['16px',  { lineHeight: '24px' }],
-        'lg':  ['18px',  { lineHeight: '26px', letterSpacing: '-0.02em' }],
-        'xl':  ['22px',  { lineHeight: '28px', letterSpacing: '-0.03em' }],
-        '2xl': ['28px',  { lineHeight: '34px', letterSpacing: '-0.04em' }],
-        '3xl': ['32px',  { lineHeight: '38px', letterSpacing: '-0.04em' }],
+        '2xs': ['10px', { lineHeight: '14px' }],
+        'xs':  ['11px', { lineHeight: '16px' }],
+        'sm':  ['13px', { lineHeight: '18px' }],
+        'base':['15px', { lineHeight: '22px' }],
+        'lg':  ['17px', { lineHeight: '24px' }],
+        'xl':  ['20px', { lineHeight: '28px' }],
+        '2xl': ['24px', { lineHeight: '30px' }],
+        '3xl': ['28px', { lineHeight: '34px' }],
+        '4xl': ['32px', { lineHeight: '38px' }],
       },
-      screens: {
-        'xs': '375px',  // iPhone SE
-        'sm': '430px',  // iPhone Pro Max / app shell max-width
-        // md+ intentionally omitted — mobile-only app
-      },
+
       boxShadow: {
-        'xs':    '0 1px 6px rgba(0,0,0,0.25)',
-        'sm':    '0 4px 16px rgba(0,0,0,0.35)',
-        'md':    '0 8px 32px rgba(0,0,0,0.45)',
-        'lg':    '0 20px 64px rgba(0,0,0,0.55)',
-        'brand': '0 8px 32px rgba(124,92,252,0.45)',
-        'glow':  '0 0 48px rgba(124,92,252,0.18)',
-        'glow-sm':'0 0 24px rgba(124,92,252,0.12)',
+        'xs':     '0 1px 6px rgba(0,0,0,0.25)',
+        'sm':     '0 4px 16px rgba(0,0,0,0.35)',
+        'md':     '0 8px 32px rgba(0,0,0,0.45)',
+        'lg':     '0 20px 64px rgba(0,0,0,0.55)',
+        'brand':  '0 8px 32px rgba(111,44,145,0.40)',
+        'glow':   '0 0 48px rgba(111,44,145,0.16)',
+        'glow-sm':'0 0 24px rgba(111,44,145,0.10)',
+      },
+
+      screens: {
+        xs: '375px',
+        sm: '430px',
+      },
+
+      transitionTimingFunction: {
+        'spring': 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'smooth': 'cubic-bezier(0.32, 0.72, 0, 1)',
+      },
+
+      keyframes: {
+        'fade-up':  { from: { opacity: '0', transform: 'translateY(12px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+        'scale-in': { from: { opacity: '0', transform: 'scale(0.92)' }, to: { opacity: '1', transform: 'scale(1)' } },
+        'slide-up': { from: { transform: 'translateY(100%)' }, to: { transform: 'translateY(0)' } },
+        shimmer:    { to: { backgroundPosition: '-200% 0' } },
+      },
+
+      animation: {
+        'fade-up':  'fade-up 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both',
+        'scale-in': 'scale-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both',
+        'slide-up': 'slide-up 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both',
+        shimmer:    'shimmer 1.5s infinite',
       },
     },
   },

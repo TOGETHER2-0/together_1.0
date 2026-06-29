@@ -52,6 +52,7 @@ class UserOut(BaseModel):
     bio: Optional[str] = None
     avatar_url: Optional[str] = None
     country_code: Optional[str] = None
+    language: Optional[str] = "en"
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -73,6 +74,7 @@ class UserProfileUpdate(BaseModel):
     bio: Optional[str] = None
     avatar_url: Optional[str] = None
     country_code: Optional[str] = None
+    language: Optional[str] = None
 
     @field_validator("full_name")
     @classmethod
@@ -91,8 +93,15 @@ class UserProfileUpdate(BaseModel):
     @field_validator("avatar_url")
     @classmethod
     def validate_avatar_url(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None and v != "" and not (v.startswith("http://") or v.startswith("https://")):
-            raise ValueError("avatar_url must be a valid HTTP(S) URL or empty string")
+        if (
+            v is not None and v != ""
+            and not (
+                v.startswith("http://")
+                or v.startswith("https://")
+                or v.startswith("data:image/")
+            )
+        ):
+            raise ValueError("avatar_url must be an HTTP(S) URL, a data:image URL, or empty")
         return v
 
     @field_validator("country_code")
@@ -101,3 +110,10 @@ class UserProfileUpdate(BaseModel):
         if v is not None and v != "" and not (len(v) == 2 and v.isupper() and v.isalpha()):
             raise ValueError("country_code must be ISO 3166-1 alpha-2 (e.g., IT, US)")
         return v if v else None
+
+    @field_validator("language")
+    @classmethod
+    def validate_language(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and v not in {"en", "sv"}:
+            raise ValueError("language must be one of: en, sv")
+        return v

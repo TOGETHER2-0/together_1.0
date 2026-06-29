@@ -9,6 +9,7 @@ export interface ProfileFields {
   bio?: string;
   avatar_url?: string;
   country_code?: string;
+  language?: string;
 }
 
 export function useUpdateProfile() {

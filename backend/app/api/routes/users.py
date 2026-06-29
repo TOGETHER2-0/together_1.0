@@ -63,7 +63,9 @@ def update_profile(
         update_data["avatar_url"] = data.avatar_url
     if data.country_code is not None:
         update_data["country_code"] = data.country_code
-    
+    if data.language is not None:
+        update_data["language"] = data.language
+
     if not update_data:
         from fastapi import HTTPException
         raise HTTPException(status_code=400, detail="No fields to update")

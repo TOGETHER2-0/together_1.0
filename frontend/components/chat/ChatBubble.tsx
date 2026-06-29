@@ -14,8 +14,8 @@ interface Props {
 }
 
 function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString('it-IT', {
-    hour: '2-digit', minute: '2-digit',
+  return new Date(iso).toLocaleTimeString('en', {
+    hour: '2-digit', minute: '2-digit', hour12: false,
   });
 }
 
@@ -70,7 +70,7 @@ export function ChatBubble({ msg, isOwn, isFirst, isLast, showTime, animate }: P
         paddingLeft:  isOwn ? 52 : 0,
         paddingRight: isOwn ? 0  : 52,
         // Animazione entrata
-        animation: animate ? 'bubbleIn 0.25s cubic-bezier(0.34,1.56,0.64,1) both' : 'none',
+        animation: animate ? 'bubbleIn 0.18s ease both' : 'none',
       }}
     >
       {/* ── Avatar (solo messaggi altrui) ─────────────────────── */}
@@ -87,7 +87,7 @@ export function ChatBubble({ msg, isOwn, isFirst, isLast, showTime, animate }: P
               height:         AVATAR_SIZE,
               borderRadius:   13,
               overflow:       'hidden',
-              background:     msg.user.avatar_color || '#7C5CFC',
+              background:     msg.user.avatar_color || '#7C3AED',
               display:        'flex',
               alignItems:     'center',
               justifyContent: 'center',
@@ -149,7 +149,7 @@ export function ChatBubble({ msg, isOwn, isFirst, isLast, showTime, animate }: P
           padding:      '10px 14px',
           borderRadius: radius,
           background:   isOwn
-            ? 'linear-gradient(135deg, #7C5CFC 0%, #9B6DFF 60%, #FF5E7D 100%)'
+            ? 'var(--brand-primary)'
             : 'var(--bg-elevated)',
           border:       isOwn ? 'none' : '1px solid var(--border-subtle)',
           color:        isOwn ? '#fff' : 'var(--text-primary)',
@@ -157,9 +157,7 @@ export function ChatBubble({ msg, isOwn, isFirst, isLast, showTime, animate }: P
           lineHeight:   1.5,
           wordBreak:    'break-word',
           whiteSpace:   'pre-wrap',
-          boxShadow:    isOwn
-            ? '0 4px 16px rgba(124,92,252,0.3)'
-            : '0 1px 4px rgba(0,0,0,0.15)',
+          boxShadow:    'none',
           // Transizione colore per hover futuro
           transition: 'opacity 0.15s ease',
         }}>
@@ -183,8 +181,8 @@ export function ChatBubble({ msg, isOwn, isFirst, isLast, showTime, animate }: P
 
       <style>{`
         @keyframes bubbleIn {
-          from { opacity: 0; transform: translateY(8px) scale(0.96); }
-          to   { opacity: 1; transform: translateY(0)  scale(1);    }
+          from { opacity: 0; transform: translateY(4px); }
+          to   { opacity: 1; transform: translateY(0);   }
         }
       `}</style>
     </div>

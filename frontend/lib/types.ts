@@ -7,6 +7,7 @@ export interface User {
   bio?: string;
   avatar_url?: string;
   country_code?: string;
+  language?: string;
   created_at: string;
 }
 
@@ -25,9 +26,10 @@ export interface Event {
   location_text: string;
   latitude: number | null;
   longitude: number | null;
-  max_participants: number;
+  max_participants: number | null;
   accommodation: string | null;
   floor: number | null;
+  category: string | null;
   host: User;
   created_at: string;
   approved_count: number;

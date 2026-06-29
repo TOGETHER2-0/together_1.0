@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useMemo } from 'react';
+import { MessageSquare } from 'lucide-react';
 import { useEventChat } from '@/hooks/useEventChat';
 import { useAuthStore } from '@/lib/store';
 import { ChatBubble }       from './ChatBubble';
@@ -101,8 +102,6 @@ export function EventChatDrawer({ eventId, eventTitle, isOpen, onClose }: Props)
           position:  'fixed',
           inset:     0,
           background:'rgba(0,0,0,0.55)',
-          backdropFilter: 'blur(6px)',
-          WebkitBackdropFilter: 'blur(6px)',
           zIndex:    49,
           opacity:   ready ? 1 : 0,
           transition:'opacity 0.28s ease',
@@ -169,15 +168,15 @@ export function EventChatDrawer({ eventId, eventTitle, isOpen, onClose }: Props)
             width:          40,
             height:         40,
             borderRadius:   14,
-            background:     'linear-gradient(135deg, rgba(124,92,252,0.2), rgba(255,94,125,0.2))',
-            border:         '1px solid rgba(124,92,252,0.25)',
+            background:     'var(--bg-elevated)',
+            border:         '1px solid var(--border-subtle)',
             display:        'flex',
             alignItems:     'center',
             justifyContent: 'center',
-            fontSize:       20,
+            color:          'var(--text-secondary)',
             flexShrink:     0,
           }}>
-            💬
+            <MessageSquare size={18} strokeWidth={1.75} />
           </div>
 
           {/* Title */}
@@ -190,7 +189,7 @@ export function EventChatDrawer({ eventId, eventTitle, isOpen, onClose }: Props)
               textTransform: 'uppercase',
               marginBottom:  2,
             }}>
-              Event Chat
+              Event coordination
             </p>
             <h3 style={{
               fontSize:      16,
@@ -228,9 +227,9 @@ export function EventChatDrawer({ eventId, eventTitle, isOpen, onClose }: Props)
               margin:         '12px auto',
               padding:        '10px 18px',
               borderRadius:   12,
-              background:     'rgba(255,94,125,0.1)',
-              border:         '1px solid rgba(255,94,125,0.2)',
-              color:          '#FF5E7D',
+              background:     'rgba(251,113,133,0.1)',
+              border:         '1px solid rgba(251,113,133,0.2)',
+              color:          '#FB7185',
               fontSize:       13,
               textAlign:      'center',
             }}>
@@ -251,29 +250,29 @@ export function EventChatDrawer({ eventId, eventTitle, isOpen, onClose }: Props)
               textAlign:      'center',
             }}>
               <div style={{
-                width:          72,
-                height:         72,
-                borderRadius:   24,
-                background:     'rgba(124,92,252,0.1)',
-                border:         '1px solid rgba(124,92,252,0.15)',
+                width:          64,
+                height:         64,
+                borderRadius:   20,
+                background:     'var(--bg-elevated)',
+                border:         '1px solid var(--border-subtle)',
                 display:        'flex',
                 alignItems:     'center',
                 justifyContent: 'center',
-                fontSize:       34,
+                color:          'var(--text-muted)',
                 marginBottom:   4,
               }}>
-                👋
+                <MessageSquare size={24} strokeWidth={1.75} />
               </div>
-              <p style={{ fontWeight: 900, fontSize: 20, letterSpacing: '-0.03em' }}>
+              <p style={{ fontWeight: 700, fontSize: 17, letterSpacing: '-0.02em' }}>
                 No messages yet
               </p>
               <p style={{
                 color:      'var(--text-secondary)',
                 fontSize:   14,
                 lineHeight: 1.6,
-                maxWidth:   210,
+                maxWidth:   240,
               }}>
-                Say hi to the other attendees!
+                Use this thread to coordinate time, place, and details for the event.
               </p>
             </div>
           )}

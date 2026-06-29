@@ -29,13 +29,12 @@ export default function Home() {
       background: 'var(--bg-base)',
     }}>
       <div style={{
-        width: 32, height: 32,
-        border: '3px solid rgba(255,255,255,0.1)',
-        borderTopColor: '#7C5CFC',
+        width: 34, height: 34,
+        border: '3px solid rgba(255,255,255,0.08)',
+        borderTopColor: 'var(--brand-primary)',
         borderRadius: '50%',
         animation: 'spin 0.7s linear infinite',
       }} />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

@@ -19,10 +19,11 @@ class Event(Base):
     location_text = Column(String(255), nullable=False)
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
-    max_participants = Column(Integer, nullable=False, default=10)
+    max_participants = Column(Integer, nullable=True, default=None)
     host_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     accommodation = Column(String(255), nullable=True)
     floor = Column(Integer, nullable=True)
+    category = Column(String(20), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     host = relationship("User", back_populates="hosted_events", foreign_keys=[host_id])

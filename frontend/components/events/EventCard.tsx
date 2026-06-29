@@ -1,189 +1,202 @@
 'use client';
 
 import Link from 'next/link';
+import { MapPin, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
 import { Event } from '@/lib/types';
-import { getFacultyColor, getFacultyColorDim, getFacultyColorBorder, getFacultyShort } from '@/lib/faculties';
-import { getCategoryMeta, formatEventTime, getInitials } from '@/lib/utils';
+import { eventWhen, hexToRgba } from '@/lib/utils';
+import { Avatar } from '@/components/ui/Avatar';
 
 interface Props {
   event: Event;
   style?: React.CSSProperties;
 }
 
+/* Build a Google Maps link — exact pin when we have coords, else a text search. */
+function mapsUrl(e: Event): string {
+  if (e.latitude != null && e.longitude != null) {
+    return `https://www.google.com/maps/search/?api=1&query=${e.latitude},${e.longitude}`;
+  }
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.location_text || '')}`;
+}
+
 export default function EventCard({ event, style }: Props) {
   const { user } = useAuthStore();
-  const date   = new Date(event.event_datetime);
-  const isPast = date < new Date();
+  const date      = new Date(event.event_datetime);
+  const isPast    = date < new Date();
+  const host      = event.host;
+  const hostColor = host.avatar_color || '#7C3AED';
 
-  const faculty     = event.host?.faculty;
-  const color       = getFacultyColor(faculty);
-  const colorDim    = getFacultyColorDim(faculty);
-  const colorBorder = getFacultyColorBorder(faculty);
-  const catMeta     = getCategoryMeta(event.location_text);
+  const approvedReqs = event.join_requests?.filter(r => r.status === 'approved') ?? [];
+  const approved     = approvedReqs.length;
+  const capacity     = event.max_participants;
+  const hasCapacity  = capacity !== null && capacity !== undefined;
+  const spotsLeft    = hasCapacity ? (capacity as number) - approved : null;
+  const isFull       = hasCapacity && (spotsLeft as number) <= 0;
+  const fillingUp    = hasCapacity && !isFull && (approved / (capacity as number)) >= 0.65;
 
-  const approved  = event.join_requests?.filter(r => r.status === 'approved').length ?? 0;
-  const capacity  = event.max_participants;
-  const fillPct   = capacity ? Math.min((approved / capacity) * 100, 100) : 0;
-  const isFull    = fillPct >= 100;
-  const spotsLeft = capacity ? capacity - approved : null;
+  const firstName = (n: string) => n.trim().split(' ')[0];
+
+  /* ── The signature: the name-dot sentence. Up to three real first names,
+     separated by centered dots, then a dim "+N going" tail. This specific
+     pattern is Together's fingerprint — who's inside, before you knock. ── */
+  const namesShown = approvedReqs.slice(0, 3).map(r => firstName(r.user.full_name));
+  const overflowN  = approved - namesShown.length;
 
   const myRequest = event.join_requests?.find(r => r.user?.id === user?.id);
   const statusBadge = myRequest
     ? myRequest.status === 'approved'
-      ? { label: 'Joined ✓', color: '#00E5B3', bg: 'rgba(0,229,179,0.12)',  border: 'rgba(0,229,179,0.25)' }
+      ? { label: 'Joined',   Icon: CheckCircle, color: '#34D399', bg: 'rgba(52,211,153,0.12)', border: 'rgba(52,211,153,0.24)' }
       : myRequest.status === 'pending'
-      ? { label: 'Pending',  color: '#FFB547',  bg: 'rgba(255,181,71,0.12)', border: 'rgba(255,181,71,0.25)' }
-      : { label: 'Declined', color: '#FF5E7D',  bg: 'rgba(255,94,125,0.12)', border: 'rgba(255,94,125,0.25)' }
+      ? { label: 'Pending',  Icon: Clock,       color: '#FBBF24', bg: 'rgba(251,191,36,0.12)', border: 'rgba(251,191,36,0.24)' }
+      : { label: 'Declined', Icon: XCircle,     color: '#FB7185', bg: 'rgba(251,113,133,0.12)', border: 'rgba(251,113,133,0.24)' }
     : null;
 
-  const weekday  = date.toLocaleString('en', { weekday: 'short' }).toUpperCase();
-  const monthStr = date.toLocaleString('en', { month: 'short' }).toUpperCase();
+  const nowMs   = Date.now();
+  const diffH   = (date.getTime() - nowMs) / 3_600_000;
+  const isToday = date.toDateString() === new Date().toDateString();
+  const isSoon  = diffH > 0 && diffH <= 3;
+  const timeTag = isSoon ? 'Soon' : isToday ? 'Today' : null;
+
+  const whenStr = eventWhen(event.event_datetime);
+
+  // visible avatar faces in the social header (max 3 + overflow chip)
+  const faces = approvedReqs.slice(0, 3);
 
   return (
     <Link href={`/events/${event.id}`} style={{ textDecoration: 'none', display: 'block', ...style }}>
       <div
         style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border-subtle)',
-          borderRadius: 22,
-          overflow: 'hidden',
-          opacity: isPast ? 0.6 : 1,
-          transition: 'transform 0.22s cubic-bezier(0.34,1.56,0.64,1), border-color 0.2s ease',
+          background: `${hexToRgba(hostColor, 0.05)}`,
+          border: `0.5px solid ${hexToRgba(hostColor, 0.22)}`,
+          borderRadius: 17,
+          padding: 14,
+          opacity: isPast ? 0.55 : 1,
+          transition: 'border-color 0.18s ease, background 0.18s ease',
         }}
         onMouseEnter={e => {
-          (e.currentTarget as HTMLDivElement).style.borderColor = colorBorder;
-          (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-1px)';
+          const el = e.currentTarget as HTMLDivElement;
+          el.style.borderColor = hexToRgba(hostColor, 0.40);
+          el.style.background = hexToRgba(hostColor, 0.08);
         }}
         onMouseLeave={e => {
-          (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border-subtle)';
-          (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)';
+          const el = e.currentTarget as HTMLDivElement;
+          el.style.borderColor = hexToRgba(hostColor, 0.22);
+          el.style.background = hexToRgba(hostColor, 0.05);
         }}
       >
-        {/* Faculty accent bar */}
-        <div style={{ height: 2.5, background: `linear-gradient(90deg, ${color}, ${color}40)` }} />
-
-        <div style={{ padding: '16px 18px 14px' }}>
-          <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-
-            {/* Date column */}
-            <div style={{
-              width: 52, minWidth: 52,
-              background: colorDim,
-              border: `1px solid ${colorBorder}`,
-              borderRadius: 14,
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center',
-              padding: '10px 4px 8px',
-              gap: 1,
-            }}>
-              <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.08em', color, fontFamily: 'var(--font-display)' }}>
-                {weekday}
-              </span>
-              <span style={{ fontSize: 24, fontWeight: 800, lineHeight: 1, color: 'var(--text-primary)', fontFamily: 'var(--font-display)', letterSpacing: '-0.04em' }}>
-                {date.getDate()}
-              </span>
-              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.06em', color, fontFamily: 'var(--font-display)' }}>
-                {monthStr}
-              </span>
-              <div style={{ marginTop: 5, padding: '2px 6px', background: 'rgba(0,0,0,0.2)', borderRadius: 999 }}>
-                <span style={{ fontSize: 9, color: 'var(--text-secondary)', fontWeight: 600 }}>
-                  {formatEventTime(event.event_datetime)}
-                </span>
-              </div>
-            </div>
-
-            {/* Content */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 7 }}>
-                <h3 style={{
-                  fontSize: 15.5, fontWeight: 700,
-                  color: 'var(--text-primary)', lineHeight: 1.3,
-                  fontFamily: 'var(--font-display)', letterSpacing: '-0.025em',
-                  flex: 1, overflow: 'hidden',
-                  display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-                }}>
-                  {event.title}
-                </h3>
-                {statusBadge && (
-                  <span style={{
-                    fontSize: 10, fontWeight: 700,
-                    color: statusBadge.color, background: statusBadge.bg,
-                    border: `1px solid ${statusBadge.border}`,
-                    borderRadius: 999, padding: '3px 9px',
-                    whiteSpace: 'nowrap', flexShrink: 0,
-                    letterSpacing: '0.04em', textTransform: 'uppercase',
-                  }}>
-                    {statusBadge.label}
-                  </span>
-                )}
-              </div>
-
-              {/* Location */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--text-secondary)', fontSize: 13, marginBottom: 9 }}>
-                <span>{catMeta.icon}</span>
-                <span style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', fontWeight: 500 }}>
-                  {event.location_text}
-                </span>
-              </div>
-
-              {/* Host row */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                  <div style={{
-                    width: 22, height: 22, borderRadius: '50%',
-                    background: color,
-                    color: faculty === 'JTH' || faculty === 'Hälso' ? '#0A0A14' : '#fff',
-                    fontSize: 9, fontWeight: 800,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexShrink: 0,
-                  }}>
-                    {getInitials(event.host?.full_name).charAt(0)}
+        {/* ── 1. SOCIAL HEADER — always first. Faces + the name-dot sentence. ── */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 11 }}>
+          <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+            {approved > 0 ? (
+              <>
+                {faces.map((req, i) => (
+                  <div key={req.id} style={{ marginLeft: i === 0 ? 0 : -8, zIndex: 5 - i }}>
+                    <Avatar name={req.user.full_name} color={req.user.avatar_color} url={req.user.avatar_url} size={28} ringWidth={1.5} />
                   </div>
-                  <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500 }}>
-                    {event.host?.full_name?.split(' ')[0] || 'Unknown'}
-                  </span>
-                  {faculty && (
-                    <span style={{
-                      fontSize: 9, fontWeight: 800, color,
-                      background: colorDim, border: `1px solid ${colorBorder}`,
-                      borderRadius: 999, padding: '2px 7px',
-                      fontFamily: 'var(--font-display)',
-                    }}>
-                      {getFacultyShort(faculty)}
-                    </span>
-                  )}
-                </div>
-
-                {capacity && !isFull && spotsLeft !== null && (
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#00E5B3', background: 'rgba(0,229,179,0.10)', border: '1px solid rgba(0,229,179,0.22)', borderRadius: 999, padding: '2px 9px' }}>
-                    {spotsLeft} left
-                  </span>
+                ))}
+                {overflowN > 0 && (
+                  <div style={{
+                    width: 24, height: 24, borderRadius: '50%', marginLeft: -7,
+                    background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.12)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: 'rgba(255,255,255,0.45)', fontSize: 9, fontWeight: 700, zIndex: 0,
+                  }}>+{overflowN}</div>
                 )}
-                {capacity && isFull && (
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#FF5E7D', background: 'rgba(255,94,125,0.10)', border: '1px solid rgba(255,94,125,0.22)', borderRadius: 999, padding: '2px 9px' }}>
-                    Full
-                  </span>
-                )}
-              </div>
-            </div>
+              </>
+            ) : (
+              <Avatar name={host.full_name} color={hostColor} url={host.avatar_url} size={28} ringWidth={1.5} />
+            )}
           </div>
 
-          {/* Capacity bar */}
-          {capacity && (
-            <div style={{ marginTop: 14 }}>
-              <div className="progress-track">
-                <div className="progress-fill" style={{
-                  width: `${fillPct}%`,
-                  background: isFull
-                    ? 'linear-gradient(90deg, #FF3357, #FF5E7D)'
-                    : `linear-gradient(90deg, ${color}, ${color}99)`,
-                }} />
-              </div>
-            </div>
+          <span style={{
+            fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.80)', lineHeight: 1.3,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0,
+          }}>
+            {approved > 0 ? (
+              <>
+                {namesShown.join(' · ')}
+                <span style={{ color: 'rgba(255,255,255,0.34)' }}>
+                  {overflowN > 0 ? ` +${overflowN} going` : ' going'}
+                </span>
+              </>
+            ) : (
+              <>
+                {firstName(host.full_name)}
+                <span style={{ color: 'rgba(255,255,255,0.34)' }}> · be the first to join</span>
+              </>
+            )}
+          </span>
+        </div>
+
+        {/* ── 2. TITLE ──────────────────────────────────────────── */}
+        <h3 style={{
+          fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.22,
+          fontFamily: 'var(--font-display)', letterSpacing: '-0.02em', margin: '0 0 9px',
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+        } as React.CSSProperties}>
+          {event.title}
+        </h3>
+
+        {/* ── 3. FOOTER — time · location + Maps, balanced with join state ── */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, minWidth: 0, flex: 1 }}>
+            <Clock size={11} strokeWidth={1.9} style={{ color: 'rgba(255,255,255,0.30)', flexShrink: 0 }} />
+            <span style={{
+              fontSize: 11, color: 'rgba(255,255,255,0.34)', fontWeight: 500,
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+            }}>
+              {whenStr}{timeTag ? ` · ${timeTag}` : ''} · {event.location_text}
+            </span>
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.open(mapsUrl(event), '_blank', 'noopener'); }}
+              aria-label="Open in Google Maps"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 3, padding: '3px 7px 3px 5px',
+                borderRadius: 8, border: 'none', cursor: 'pointer', background: 'transparent',
+                fontFamily: 'inherit', fontSize: 10, fontWeight: 600, letterSpacing: '0.02em',
+                color: hexToRgba(hostColor, 0.95), flexShrink: 0,
+              }}
+            >
+              <MapPin size={11} strokeWidth={2} />Maps
+            </button>
+          </div>
+
+          {statusBadge ? (
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600,
+              color: statusBadge.color, background: statusBadge.bg, border: `1px solid ${statusBadge.border}`,
+              borderRadius: 999, padding: '4px 10px', whiteSpace: 'nowrap', flexShrink: 0,
+            }}>
+              <statusBadge.Icon size={10} strokeWidth={2} />
+              {statusBadge.label}
+            </span>
+          ) : isFull ? (
+            <Pill color="#FB7185" bg="rgba(251,113,133,0.10)" border="rgba(251,113,133,0.20)">Full</Pill>
+          ) : fillingUp ? (
+            <Pill color="#FBBF24" bg="rgba(251,191,36,0.12)" border="rgba(251,191,36,0.24)">{spotsLeft} left</Pill>
+          ) : (
+            <span style={{
+              fontSize: 11, fontWeight: 700, padding: '6px 14px', borderRadius: 999,
+              color: '#fff', background: hostColor, whiteSpace: 'nowrap', flexShrink: 0,
+              letterSpacing: '0.02em',
+            }}>Join →</span>
           )}
         </div>
       </div>
     </Link>
+  );
+}
+
+/* ─── Pieces ─────────────────────────────────────────────────── */
+
+function Pill({ children, color, bg, border }: { children: React.ReactNode; color: string; bg: string; border: string }) {
+  return (
+    <span style={{
+      fontSize: 11, fontWeight: 700, color, background: bg, border: `1px solid ${border}`,
+      borderRadius: 999, padding: '4px 10px', lineHeight: 1.4, whiteSpace: 'nowrap', flexShrink: 0,
+    }}>
+      {children}
+    </span>
   );
 }

@@ -1,7 +1,23 @@
 import axios from "axios";
 
+/*
+  FIX — baseURL vuoto.
+
+  Prima puntava direttamente all'URL ngrok del backend
+  (https://pardon-raffle-grip.ngrok-free.dev). Questo richiedeva
+  2 tunnel ngrok attivi simultaneamente (frontend + backend),
+  cosa che il piano free non permette (ERR_NGROK_334).
+
+  Ora il frontend chiama path RELATIVI (es. /api/auth/login).
+  Il browser li indirizza allo stesso dominio su cui sta navigando
+  (il dominio ngrok del frontend, porta 3000). next.config.js
+  intercetta quei path con un rewrite e li proxa internamente verso
+  http://localhost:8000, dove gira FastAPI.
+
+  Risultato: un solo tunnel ngrok necessario (quello del frontend).
+*/
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "",
   headers: { "Content-Type": "application/json" },
 });
 
@@ -16,7 +32,7 @@ api.interceptors.request.use((config) => {
 
 // Unwrap data + handle 401
 api.interceptors.response.use(
-  (res) => res.data,  // ← restituisce direttamente res.data
+  (res) => res.data,
   (err) => {
     if (err.response?.status === 401 && typeof window !== "undefined") {
       localStorage.removeItem("together-token");
@@ -44,7 +60,6 @@ export const authApi = {
   logout: () => api.post("/api/auth/logout"),
 };
 
-
 // Events
 export const eventsApi = {
   list: () => api.get("/api/events"),
@@ -67,7 +82,7 @@ export const eventsApi = {
 export const usersApi = {
   myEvents: () => api.get("/api/users/me/events"),
   getProfile: () => api.get("/api/users/profile"),
-  updateProfile: (data: { full_name?: string; bio?: string; avatar_url?: string; country_code?: string }) =>
+  updateProfile: (data: { full_name?: string; bio?: string; avatar_url?: string; country_code?: string; language?: string }) =>
     api.patch("/api/users/profile", data),
 };
 
@@ -78,6 +93,7 @@ export const profileApi = {
     bio?: string;
     avatar_url?: string;
     country_code?: string;
+    language?: string;
   }) => {
     const res = await api.patch('/api/users/profile', data);
     return res;
@@ -89,6 +105,6 @@ export const profileApi = {
     const res = await api.post('/api/users/avatar', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
-    return res; // { avatar_url: "..." }
+    return res;
   },
 };

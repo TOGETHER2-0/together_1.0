@@ -1,69 +1,3 @@
-// ─── Single source of truth for category detection and colors ─
-
-export type Category = 'accommodation' | 'campus' | 'bar' | 'outdoor' | 'other';
-
-export const CATEGORY_META: Record<Category, {
-  color: string;
-  dim: string;
-  border: string;
-  icon: string;
-  label: string;
-}> = {
-  accommodation: {
-    color:  '#FFB547',
-    dim:    'rgba(255,181,71,0.12)',
-    border: 'rgba(255,181,71,0.25)',
-    icon:   '🏠',
-    label:  'Accommodation',
-  },
-  campus: {
-    color:  '#7C5CFC',
-    dim:    'rgba(124,92,252,0.12)',
-    border: 'rgba(124,92,252,0.25)',
-    icon:   '🎓',
-    label:  'Campus',
-  },
-  bar: {
-    color:  '#FF5E7D',
-    dim:    'rgba(255,94,125,0.12)',
-    border: 'rgba(255,94,125,0.25)',
-    icon:   '🍺',
-    label:  'Social',
-  },
-  outdoor: {
-    color:  '#00E5B3',
-    dim:    'rgba(0,229,179,0.12)',
-    border: 'rgba(0,229,179,0.25)',
-    icon:   '🌿',
-    label:  'Outdoor',
-  },
-  other: {
-    color:  '#60A5FA',
-    dim:    'rgba(96,165,250,0.12)',
-    border: 'rgba(96,165,250,0.25)',
-    icon:   '📍',
-    label:  'Other',
-  },
-};
-
-const ACCOMMODATION_KEYWORDS = ['råslätt','ekhagen','delta','kånkapsfabriken'];
-const CAMPUS_KEYWORDS         = ['jibs','jth','hlk','campus','library'];
-const BAR_KEYWORDS            = ['bishop','sturekäll','dojon','norrby','bar','spegeln','village','monk'];
-const OUTDOOR_KEYWORDS        = ['vättern','park','beach','huskvarna','rock','skog'];
-
-export function detectCategory(locationText: string): Category {
-  const l = (locationText || '').toLowerCase();
-  if (ACCOMMODATION_KEYWORDS.some(k => l.includes(k))) return 'accommodation';
-  if (CAMPUS_KEYWORDS.some(k => l.includes(k)))         return 'campus';
-  if (BAR_KEYWORDS.some(k => l.includes(k)))            return 'bar';
-  if (OUTDOOR_KEYWORDS.some(k => l.includes(k)))        return 'outdoor';
-  return 'other';
-}
-
-export function getCategoryMeta(locationText: string) {
-  return CATEGORY_META[detectCategory(locationText)];
-}
-
 // ─── Date helpers ─────────────────────────────────────────────
 
 export function formatEventDate(datetime: string): string {
@@ -84,6 +18,41 @@ export function formatEventDateLong(datetime: string): string {
 
 export function isUpcoming(datetime: string): boolean {
   return new Date(datetime) >= new Date();
+}
+
+// Single canonical countdown — "in 12m" / "in 3h" / "Tomorrow" / "in 5d" /
+// "23 Mar". Used by every surface so relative time reads identically app-wide.
+export function timeUntil(datetime: string): string {
+  const diff = new Date(datetime).getTime() - Date.now();
+  if (diff <= 0) return 'Now';
+  const mins = Math.round(diff / 60000);
+  if (mins < 60) return `in ${mins}m`;
+  const hrs = Math.round(mins / 60);
+  if (hrs < 24) return `in ${hrs}h`;
+  const days = Math.round(hrs / 24);
+  if (days === 1) return 'Tomorrow';
+  if (days < 7) return `in ${days}d`;
+  return new Date(datetime).toLocaleDateString('en', { day: 'numeric', month: 'short' });
+}
+
+// Single canonical short date+time — "Sat 23 Mar · 14:00".
+export function eventWhen(datetime: string): string {
+  const d = new Date(datetime);
+  return d.toLocaleDateString('en', { weekday: 'short', day: 'numeric', month: 'short' })
+    + ' · ' + d.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+// ─── Color helpers ────────────────────────────────────────────
+
+// Single canonical hex→rgba. Accepts #RGB / #RRGGBB and falls back to the
+// brand violet for anything non-hex (e.g. a CSS var string), so callers can
+// pass either an avatar_color hex or a faculty/brand fallback safely.
+export function hexToRgba(hex: string | null | undefined, a: number): string {
+  if (!hex || !hex.startsWith('#')) return `rgba(124, 58, 237, ${a})`;
+  const h = hex.replace('#', '');
+  const f = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+  const n = parseInt(f, 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
 }
 
 // ─── String helpers ───────────────────────────────────────────

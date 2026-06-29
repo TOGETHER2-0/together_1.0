@@ -5,52 +5,74 @@
 
 /* ─── Design Tokens ─────────────────────────────────────────── */
 :root {
-  /* Brand */
-  --brand-primary:    #7C5CFC;
-  --brand-secondary:  #FF5E7D;
-  --brand-accent:     #00E5B3;
-  --brand-warm:       #FFB547;
-  --brand-gradient:   linear-gradient(135deg, #7C5CFC 0%, #FF5E7D 100%);
+  /* Brand — Dark Matter violet. The accent is an electric violet that glows
+     against the void. --brand-gradient stays a flat color so every existing
+     reference flattens to the new accent at once. */
+  --brand-primary:       #7C3AED;
+  --brand-primary-hover: #8B5CF6;
+  --brand-dark:          #5B21B6;
+  --brand-light:         #F5F3FF;
+  --brand-mid:           #A78BFA;
+  --brand-gradient:      #7C3AED;
 
-  /* Backgrounds */
-  --bg-base:          #080810;
-  --bg-surface:       #0F0F1C;
-  --bg-elevated:      #181828;
-  --bg-card:          #131320;
-  --bg-glass:         rgba(255,255,255,0.04);
-  --bg-glass-strong:  rgba(255,255,255,0.07);
+  /* Backgrounds — Dark Matter void. A deep blue-black base with translucent
+     surfaces layered on top so cards read as light caught in the dark, not
+     opaque panels. Surfaces are intentionally near-transparent whites. */
+  --bg-base:          #09091A;
+  --bg-surface:       #0D0D1F;
+  --bg-card:          #121226;
+  --bg-elevated:      #1A1A30;
+  --bg-glass:         rgba(255,255,255,0.05);
+  --bg-glass-strong:  rgba(255,255,255,0.09);
 
-  /* Text */
-  --text-primary:     #EEEEFF;
-  --text-secondary:   #8888AA;
-  --text-muted:       #44445A;
+  /* Activity / energy accents — used for live, soon, and momentum signals */
+  --accent-live:      #FB7185;
+  --accent-soon:      #FBBF24;
+  --accent-go:        #34D399;
+  --spotlight-gradient: linear-gradient(135deg, #7C3AED 0%, #A855F7 55%, #6366F1 120%);
 
-  /* Borders */
-  --border-subtle:    rgba(255,255,255,0.055);
-  --border-medium:    rgba(255,255,255,0.10);
-  --border-accent:    rgba(124,92,252,0.45);
-  --border-glow:      rgba(124,92,252,0.2);
+  /* Text — high-contrast on the void, three steps down into the dark */
+  --text-primary:     #F4F4FB;
+  --text-secondary:   #9C9CB8;
+  --text-muted:       #56566E;
 
-  /* Radii */
+  /* Borders — hairline whites against the void */
+  --border-subtle:    rgba(255,255,255,0.07);
+  --border-medium:    rgba(255,255,255,0.12);
+  --border-accent:    rgba(124,58,237,0.45);
+  --border-glow:      rgba(124,58,237,0.20);
+
+  /* Radii — calmer, tighter scale */
   --radius-xs:   8px;
-  --radius-sm:   12px;
-  --radius-md:   18px;
-  --radius-lg:   24px;
-  --radius-xl:   32px;
+  --radius-sm:   10px;
+  --radius-md:   14px;
+  --radius-lg:   18px;
+  --radius-xl:   22px;
   --radius-pill: 999px;
 
-  /* Shadows */
-  --shadow-xs:      0 1px 6px rgba(0,0,0,0.25);
-  --shadow-sm:      0 4px 16px rgba(0,0,0,0.35);
-  --shadow-md:      0 8px 32px rgba(0,0,0,0.45);
-  --shadow-lg:      0 20px 64px rgba(0,0,0,0.55);
-  --shadow-glow:    0 0 48px rgba(124,92,252,0.18);
-  --shadow-glow-sm: 0 0 24px rgba(124,92,252,0.12);
-  --shadow-brand:   0 8px 32px rgba(124,92,252,0.45);
+  /* Shadows — 3 levels:
+     card-rest  → resting surface lift
+     card-hover → interactive lift
+     brand      → brand-colored elements (FAB, primary buttons)
+     sheet      → overlays and bottom sheets
+  */
+  /* Matte Calm — depth is tone + hairline border, not shadow. The only real
+     shadows are reserved for floating overlays (sheets, popups). */
+  --shadow-xs:        0 1px 2px rgba(0,0,0,0.16);
+  --shadow-sm:        0 2px 8px rgba(0,0,0,0.20);
+  --shadow-md:        0 8px 24px rgba(0,0,0,0.28);
+  --shadow-lg:        0 16px 44px rgba(0,0,0,0.36);
+  --shadow-card:      none;
+  --shadow-card-hover:none;
+  --shadow-brand:     none;
+  --shadow-brand-hover:none;
+  --shadow-sheet:     0 -6px 28px rgba(0,0,0,0.30);
+  --shadow-glow:      none;
+  --shadow-glow-sm:   none;
 
-  /* Fonts — single source of truth */
-  --font-display: 'Syne', sans-serif;
-  --font-body:    'DM Sans', sans-serif;
+  /* Fonts */
+  --font-display: var(--font-geist-sans), 'system-ui', sans-serif;
+  --font-body:    var(--font-geist-sans), 'system-ui', sans-serif;
 
   /* Safe areas */
   --safe-top:    env(safe-area-inset-top, 0px);
@@ -58,7 +80,7 @@
   --safe-left:   env(safe-area-inset-left, 0px);
   --safe-right:  env(safe-area-inset-right, 0px);
 
-  /* Bottom nav height (visual bar only, no safe area) */
+  /* Bottom nav height */
   --nav-height: 62px;
 }
 
@@ -76,7 +98,6 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Single body block — no duplicate */
 body {
   height: 100%;
   background: var(--bg-base);
@@ -84,21 +105,12 @@ body {
   font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.6;
-  overflow: hidden; /* scroll happens inside #app-root > main */
+  overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* ─── App Root ───────────────────────────────────────────────── */
-/*
-  Layout strategy:
-  - body is 100% tall, overflow hidden
-  - #app-root is a flex column filling the full viewport
-  - <main> is the ONLY scroll container (flex: 1, overflow-y: auto)
-  - BottomNav is a static flex child at the bottom — never position:fixed
-  - This makes position:sticky work correctly inside <main>
-  - This fixes the Safari iOS fixed-inside-overflow bug
-*/
 #app-root {
   display: flex;
   flex-direction: column;
@@ -110,17 +122,7 @@ body {
   overflow: hidden;
 }
 
-/* Noise texture overlay */
-#app-root::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 9999;
-}
-
-/* Safe-area top spacer — rendered by StatusBarSpacer component */
+/* Status bar spacer */
 .status-bar-space {
   flex-shrink: 0;
   height: var(--safe-top);
@@ -134,7 +136,6 @@ body {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
-  /* No padding-bottom here — BottomNav is outside this element */
 }
 
 /* ─── Typography ────────────────────────────────────────────── */
@@ -150,7 +151,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ─── Selection ─────────────────────────────────────────────── */
 ::selection {
-  background: rgba(124,92,252,0.28);
+  background: rgba(124,58,237,0.28);
   color: var(--text-primary);
 }
 
@@ -160,12 +161,13 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
-              border-color 0.2s ease,
-              box-shadow 0.2s ease;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease;
 }
 
-.card:active { transform: scale(0.975); }
+.card:hover  { border-color: var(--border-medium); }
+.card:active { background: var(--bg-elevated); }
 
 .card-elevated {
   background: var(--bg-elevated);
@@ -174,9 +176,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .card-glass {
-  background: var(--bg-glass);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background: var(--bg-surface);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-lg);
 }
@@ -195,54 +195,51 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1;
   border: none;
   cursor: pointer;
-  transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Two-step transition: spring for scale, ease for shadow/color */
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    opacity 0.16s ease,
+    transform 0.08s ease;
   -webkit-user-select: none;
   user-select: none;
   position: relative;
-  overflow: hidden;
   white-space: nowrap;
   letter-spacing: -0.01em;
+  /* Prevent text-select flash on fast taps */
+  -webkit-tap-highlight-color: transparent;
 }
 
-.btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, rgba(255,255,255,0.08), transparent);
-  pointer-events: none;
-  border-radius: inherit;
-}
+.btn:active   { transform: scale(0.98); }
+.btn:disabled { opacity: 0.36; cursor: not-allowed; transform: none !important; }
 
-.btn:active   { transform: scale(0.95); }
-.btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none; }
-
+/* Primary — solid JU purple */
 .btn-primary {
-  background: var(--brand-gradient);
+  background: var(--brand-primary);
   color: #fff;
-  box-shadow: var(--shadow-brand);
 }
-.btn-primary:not(:disabled):hover {
-  box-shadow: 0 10px 40px rgba(124,92,252,0.6);
-  transform: translateY(-1px);
-}
+.btn-primary:not(:disabled):hover  { background: var(--brand-primary-hover); }
+.btn-primary:not(:disabled):active { background: var(--brand-dark); }
 
+/* Secondary — flat elevated surface */
 .btn-secondary {
-  background: var(--bg-glass-strong);
+  background: var(--bg-elevated);
   color: var(--text-primary);
   border: 1px solid var(--border-medium);
-  backdrop-filter: blur(12px);
 }
 .btn-secondary:not(:disabled):hover {
-  background: rgba(255,255,255,0.10);
+  background: var(--bg-surface);
   border-color: var(--border-accent);
 }
 
+/* Danger — solid (single product red) */
 .btn-danger {
-  background: linear-gradient(135deg, #FF3357, #FF5E7D);
+  background: #FB7185;
   color: #fff;
-  box-shadow: 0 6px 24px rgba(255,51,87,0.38);
 }
+.btn-danger:not(:disabled):hover { background: #F43F5E; }
 
+/* Ghost */
 .btn-ghost {
   background: transparent;
   color: var(--text-secondary);
@@ -250,38 +247,43 @@ h1, h2, h3, h4, h5, h6 {
 }
 .btn-ghost:hover { color: var(--text-primary); }
 
-.btn-sm   { padding: 9px 16px; font-size: 13px; }
-.btn-lg   { padding: 18px 32px; font-size: 16px; border-radius: var(--radius-lg); }
-.btn-xl   { padding: 20px 36px; font-size: 17px; border-radius: var(--radius-lg); }
-.btn-icon { width: 44px; height: 44px; padding: 0; border-radius: 50%; flex-shrink: 0; }
+.btn-sm      { padding: 9px 16px; font-size: 13px; }
+.btn-lg      { padding: 18px 32px; font-size: 16px; border-radius: var(--radius-lg); }
+.btn-xl      { padding: 20px 36px; font-size: 17px; border-radius: var(--radius-lg); }
+.btn-icon    { width: 44px; height: 44px; padding: 0; border-radius: 50%; flex-shrink: 0; }
 .btn-icon-sm { width: 36px; height: 36px; padding: 0; border-radius: 50%; flex-shrink: 0; }
-.btn-block { width: 100%; }
+.btn-block   { width: 100%; }
 
 /* ─── Inputs ────────────────────────────────────────────────── */
 .input-field {
   width: 100%;
   background: var(--bg-elevated);
-  border: 1.5px solid var(--border-subtle);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-family: var(--font-body);
   font-size: 15px;
   padding: 14px 16px;
   outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
   -webkit-appearance: none;
   appearance: none;
 }
 
 .input-field::placeholder { color: var(--text-muted); }
 
-.input-field:focus {
-  border-color: var(--brand-primary);
-  box-shadow: 0 0 0 3px rgba(124,92,252,0.15);
-  background: var(--bg-card);
+.input-field:hover:not(:focus) {
+  border-color: var(--border-medium);
 }
 
-.input-field:focus::placeholder { color: var(--text-secondary); opacity: 0.5; }
+.input-field:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.16);
+  background: var(--bg-card);
+}
 
 textarea.input-field { resize: none; }
 select.input-field    { cursor: pointer; }
@@ -309,7 +311,7 @@ select.input-field    { cursor: pointer; }
   font-family: var(--font-display);
   flex-shrink: 0;
   letter-spacing: -0.02em;
-  border: 2px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
 /* ─── Badge ──────────────────────────────────────────────────── */
@@ -325,18 +327,12 @@ select.input-field    { cursor: pointer; }
 }
 
 /* ─── Bottom Navigation ──────────────────────────────────────── */
-/*
-  BottomNav is a static flex child of #app-root — NOT position:fixed.
-  This is the fix for Safari iOS where fixed inside overflow:auto breaks.
-  The nav sits naturally at the bottom of the flex column.
-*/
 .bottom-nav {
   flex-shrink: 0;
-  background: rgba(8, 8, 16, 0.92);
-  backdrop-filter: blur(32px) saturate(200%);
-  -webkit-backdrop-filter: blur(32px) saturate(200%);
-  border-top: 1px solid var(--border-subtle);
-  /* Account for home indicator on iPhone */
+  background: rgba(9,9,26,0.92);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border-top: 0.5px solid var(--border-subtle);
   padding-bottom: var(--safe-bottom);
 }
 
@@ -368,21 +364,10 @@ select.input-field    { cursor: pointer; }
   position: relative;
 }
 
-/* Active indicator — thin top line */
-.nav-item.active::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 24px;
-  height: 2.5px;
-  border-radius: 0 0 var(--radius-pill) var(--radius-pill);
-  background: var(--brand-gradient);
-}
-
-.nav-item:active { transform: scale(0.88); }
-.nav-item.active { color: var(--brand-primary); }
+/* Dark Matter nav — flat, monochrome, word-labelled. Active = violet glow on
+   icon + label. No top line, no pill: the void carries it. */
+.nav-item:active { transform: scale(0.96); opacity: 0.8; }
+.nav-item.active { color: var(--brand-mid); }
 
 .nav-item-icon {
   width: 28px;
@@ -390,28 +375,21 @@ select.input-field    { cursor: pointer; }
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
   transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
 }
 
-.nav-item.active .nav-item-icon {
-  background: rgba(124,92,252,0.14);
+.nav-item-label {
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  font-weight: 500;
+  line-height: 1;
+  color: inherit;
 }
 
-.nav-item-label {
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  font-family: var(--font-display);
-  text-transform: uppercase;
-}
+.nav-item.active .nav-item-label { font-weight: 600; }
 
 /* ─── Page Header ────────────────────────────────────────────── */
-/*
-  Sticky inside .scroll-area — works correctly because
-  the scroll container is <main class="scroll-area">, not body.
-*/
 .page-header {
   position: sticky;
   top: 0;
@@ -431,7 +409,7 @@ select.input-field    { cursor: pointer; }
 .page-header-title {
   font-family: var(--font-display);
   font-size: 32px;
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1;
   color: var(--text-primary);
@@ -439,15 +417,14 @@ select.input-field    { cursor: pointer; }
 
 .page-header-label {
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   color: var(--text-muted);
   text-transform: uppercase;
   margin-bottom: 4px;
 }
 
 /* ─── List Row ───────────────────────────────────────────────── */
-/* Apple HIG: minimum 44pt touch target */
 .list-row {
   display: flex;
   align-items: center;
@@ -467,11 +444,10 @@ select.input-field    { cursor: pointer; }
   background: var(--bg-elevated);
 }
 
-/* Inset separator — after the leading element, not full width */
 .list-row + .list-row::before {
   content: '';
   position: absolute;
-  left: 74px; /* avatar width (52) + gap (14) + padding (20) ≈ 86 — adjusted */
+  left: 74px;
   right: 20px;
   top: 0;
   height: 1px;
@@ -552,14 +528,14 @@ select.input-field    { cursor: pointer; }
 }
 
 .toast-success {
-  background: rgba(0,229,179,0.13);
-  border-color: rgba(0,229,179,0.28);
-  color: #00E5B3;
+  background: rgba(52,211,153,0.13);
+  border-color: rgba(52,211,153,0.28);
+  color: #34D399;
 }
 .toast-error {
-  background: rgba(255,51,87,0.13);
-  border-color: rgba(255,51,87,0.28);
-  color: #FF5E7D;
+  background: rgba(251,113,133,0.13);
+  border-color: rgba(251,113,133,0.28);
+  color: #FB7185;
 }
 
 /* ─── Auth page ──────────────────────────────────────────────── */
@@ -612,49 +588,67 @@ select.input-field    { cursor: pointer; }
   overflow: hidden;
 }
 
-.blur-dot {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(70px);
-  pointer-events: none;
-}
+/* Decorative background glows are removed in the Matte Calm direction. */
+.blur-dot { display: none; }
 
-/* ─── Category chip ──────────────────────────────────────────── */
+/* ─── Category chip ──────────────────────────────────────────────
+   Unselected reads as flat ghost text; selected lifts into a solid
+   elevated pill with a brand-tinted icon. Monochrome system, one
+   accent touch — intentional rather than "generic filter tags". */
 .category-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
+  gap: 7px;
+  height: 36px;
+  padding: 0 15px;
   border-radius: var(--radius-pill);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  border: 1.5px solid var(--border-subtle);
+  border: 1px solid transparent;
   background: transparent;
   color: var(--text-secondary);
-  transition: all 0.2s ease;
   white-space: nowrap;
   letter-spacing: -0.01em;
   font-family: var(--font-body);
+  flex-shrink: 0;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
-.category-chip:active { transform: scale(0.93); }
+.category-chip svg {
+  color: var(--text-muted);
+  transition: color 0.18s ease;
+}
+
+.category-chip:hover:not(.active)      { color: var(--text-primary); }
+.category-chip:hover:not(.active) svg  { color: var(--text-secondary); }
+.category-chip:active                  { transform: scale(0.96); }
 
 .category-chip.active {
-  background: rgba(124,92,252,0.14);
-  border-color: var(--brand-primary);
-  color: #A88FFF;
-  box-shadow: 0 0 14px rgba(124,92,252,0.15);
+  background: var(--bg-elevated);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+  font-weight: 700;
+  box-shadow: var(--shadow-xs);
 }
 
+.category-chip.active svg { color: var(--brand-mid); }
+
 /* ─── Animations ─────────────────────────────────────────────── */
-@keyframes spin     { to { transform: rotate(360deg); } }
-@keyframes shimmer  { to { background-position: -200% 0; } }
-@keyframes fadeUp   { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-@keyframes fadeIn   { from { opacity: 0; } to { opacity: 1; } }
-@keyframes scaleIn  { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
-@keyframes slideUp  { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes spin      { to { transform: rotate(360deg); } }
+@keyframes shimmer   { to { background-position: -200% 0; } }
+@keyframes fadeUp    { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes fadeIn    { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scaleIn   { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+@keyframes slideUp   { from { transform: translateY(100%); } to { transform: translateY(0); } }
 @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@keyframes ping      { 75%, 100% { transform: scale(1.8); opacity: 0; } }
+@keyframes livePulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.78); } }
+@keyframes liveRing  { 0% { transform: scale(0.9); opacity: 0.55; } 100% { transform: scale(2.4); opacity: 0; } }
 
 @keyframes markerPop {
   0%   { transform: scale(0) rotate(-45deg); }
@@ -678,6 +672,14 @@ select.input-field    { cursor: pointer; }
 .leaflet-container {
   background: var(--bg-base) !important;
   font-family: var(--font-body) !important;
+}
+
+/*
+  Tailwind preflight sets `img { max-width: 100%; height: auto; }` globally.
+  This breaks Leaflet tile sizing. Override only inside the Leaflet container.
+*/
+.leaflet-container img {
+  max-width: none !important;
 }
 
 .leaflet-control-attribution { display: none !important; }
@@ -723,4 +725,126 @@ select.input-field    { cursor: pointer; }
 
 .map-marker-wrapper {
   animation: markerPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ─── Status colors ─────────────────────────────────────────── */
+:root {
+  --status-success-bg:     rgba(52,211,153,0.10);
+  --status-success-border: rgba(52,211,153,0.20);
+  --status-success-text:   #34D399;
+
+  --status-warning-bg:     rgba(251,191,36,0.10);
+  --status-warning-border: rgba(251,191,36,0.20);
+  --status-warning-text:   #FBBF24;
+
+  --status-error-bg:       rgba(251,113,133,0.10);
+  --status-error-border:   rgba(251,113,133,0.20);
+  --status-error-text:     #FB7185;
+
+  --status-info-bg:        rgba(124,58,237,0.10);
+  --status-info-border:    rgba(124,58,237,0.20);
+  --status-info-text:      var(--brand-primary);
+}
+
+/* ─── Touch feedback ─────────────────────────────────────────── */
+.pressable {
+  transition: background 0.12s ease, opacity 0.12s ease;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.pressable:active { opacity: 0.72; }
+
+/* ─── Section label ──────────────────────────────────────────── */
+.section-label {
+  font-size:      11px;
+  font-weight:    600;
+  color:          var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom:  12px;
+  font-family:    var(--font-display);
+}
+
+/* ─── Icon button ────────────────────────────────────────────── */
+.icon-btn {
+  width:           36px;
+  height:          36px;
+  border-radius:   12px;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  cursor:          pointer;
+  border:          1px solid var(--border-subtle);
+  background:      var(--bg-elevated);
+  color:           var(--text-secondary);
+  transition:      background 0.15s ease, color 0.15s ease;
+  flex-shrink:     0;
+}
+.icon-btn:active { background: var(--bg-card); }
+.icon-btn-lg     { width: 44px; height: 44px; border-radius: 15px; }
+
+/* ─── Search bar ─────────────────────────────────────────────── */
+.search-bar {
+  display:      flex;
+  align-items:  center;
+  background:   var(--bg-elevated);
+  border:       1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding:      11px 14px;
+  gap:          8px;
+  transition:   border-color 0.18s ease;
+}
+.search-bar:focus-within {
+  border-color: var(--brand-primary);
+  box-shadow:   0 0 0 3px rgba(124,58,237,0.10);
+}
+.search-bar input {
+  flex:       1;
+  background: transparent;
+  border:     none;
+  outline:    none;
+  color:      var(--text-primary);
+  font-size:  14px;
+  font-family: inherit;
+}
+
+/* ─── Input placeholder ─────────────────────────────────────── */
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--brand-primary) !important;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.15) !important;
+  outline: none;
+}
+
+select option {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+/* ─── Notification badge ─────────────────────────────────────── */
+.notif-badge {
+  position: absolute;
+  top: -3px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  background: #FB7185;
+  border-radius: 8px;
+  border: 2px solid var(--bg-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 800;
+  color: #fff;
+  padding: 0 3px;
+  line-height: 1;
 }

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from datetime import datetime
 from typing import Optional, List
 from app.schemas.user import UserOut
@@ -11,9 +11,17 @@ class EventCreate(BaseModel):
     location_text: str
     latitude: Optional[float] = None
     longitude: Optional[float] = None
-    max_participants: int = 10
+    max_participants: Optional[int] = None
     accommodation: Optional[str] = None
     floor: Optional[int] = None
+    category: Optional[str] = None
+
+    @field_validator("max_participants", mode="before")
+    @classmethod
+    def empty_capacity_is_unlimited(cls, value):
+        if value == "":
+            return None
+        return value
 
 class JoinRequestOut(BaseModel):
     id: int
@@ -32,9 +40,10 @@ class EventOut(BaseModel):
     location_text: str
     latitude: Optional[float]
     longitude: Optional[float]
-    max_participants: int
+    max_participants: Optional[int]
     accommodation: Optional[str]
     floor: Optional[int]
+    category: Optional[str]
     host: UserOut
     created_at: datetime
     approved_count: int = 0
@@ -53,6 +62,14 @@ class EventUpdate(BaseModel):
     max_participants: Optional[int] = None
     accommodation: Optional[str] = None
     floor: Optional[int] = None
+    category: Optional[str] = None
+
+    @field_validator("max_participants", mode="before")
+    @classmethod
+    def empty_capacity_is_unlimited(cls, value):
+        if value == "":
+            return None
+        return value
 
 class EventMessageOut(BaseModel):
     id: int

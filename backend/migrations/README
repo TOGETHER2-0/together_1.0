@@ -1,0 +1,64 @@
+Database Migrations — Together Backend
+=======================================
+
+Tool: Alembic
+Config: backend/alembic.ini
+Versions: backend/migrations/versions/
+
+The database URL is read from backend/.env (DATABASE_URL).
+All commands must be run from the backend/ directory.
+
+
+── Workflow: aggiungere una colonna ──────────────────────────────
+
+1. Modifica il modello SQLAlchemy in app/models/
+   Esempio: aggiungi `bio = Column(Text, nullable=True)` a User
+
+2. Genera la migration:
+   alembic revision --autogenerate -m "add_bio_to_users"
+
+3. Controlla il file generato in migrations/versions/
+   Verifica che upgrade() e downgrade() abbiano senso.
+
+4. Applica al database:
+   alembic upgrade head
+
+5. Commit di modello + migration file insieme.
+
+
+── Comandi utili ─────────────────────────────────────────────────
+
+# Stato attuale del DB
+alembic current
+
+# Storico migrations
+alembic history --verbose
+
+# Applica tutte le migrations pendenti
+alembic upgrade head
+
+# Torna indietro di una migration
+alembic downgrade -1
+
+# Genera migration senza applicarla
+alembic revision --autogenerate -m "descrizione"
+
+# Applica solo fino a una revision specifica
+alembic upgrade <revision_id>
+
+
+── Struttura ─────────────────────────────────────────────────────
+
+migrations/
+  env.py              - configurazione Alembic, importa modelli e .env
+  script.py.mako      - template per nuove migrations
+  versions/
+    1425b6e1bb4b_baseline.py                   - baseline no-op (DB pre-Alembic)
+    363fd34e9c2a_sync_schema_with_models.py    - prima sync reale
+
+
+── Regola ────────────────────────────────────────────────────────
+
+MAI eseguire ALTER TABLE manualmente.
+Ogni modifica schema deve passare da una migration Alembic
+in modo che tutti i dev e la produzione restino in sync.

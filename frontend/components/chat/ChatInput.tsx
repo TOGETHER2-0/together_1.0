@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useCallback } from 'react';
+import { AlertCircle } from 'lucide-react';
 
 interface Props {
   onSend:   (text: string) => Promise<void>;
@@ -63,11 +64,11 @@ export function ChatInput({ onSend, sending, disabled }: Props) {
           alignItems:   'center',
           gap:          6,
           fontSize:     12,
-          color:        '#FF5E7D',
+          color:        '#FB7185',
           marginBottom: 8,
           paddingLeft:  4,
         }}>
-          <span>⚠</span>
+          <AlertCircle size={13} strokeWidth={1.75} />
           <span>Message failed — tap Send to retry</span>
         </div>
       )}
@@ -78,11 +79,11 @@ export function ChatInput({ onSend, sending, disabled }: Props) {
         alignItems:  'flex-end',
         gap:         10,
         background:  'var(--bg-elevated)',
-        border:      `1.5px solid ${focused ? 'var(--brand-primary)' : 'var(--border-subtle)'}`,
+        border:      `1px solid ${focused ? 'var(--brand-primary)' : 'var(--border-subtle)'}`,
         borderRadius: 22,
         padding:     '9px 9px 9px 16px',
         transition:  'border-color 0.18s ease, box-shadow 0.18s ease',
-        boxShadow:   focused ? '0 0 0 3px rgba(124,92,252,0.12)' : 'none',
+        boxShadow:   focused ? '0 0 0 3px rgba(124,58,237,0.16)' : 'none',
       }}>
         <textarea
           ref={textareaRef}
@@ -123,19 +124,18 @@ export function ChatInput({ onSend, sending, disabled }: Props) {
             borderRadius: 14,
             flexShrink: 0,
             background: canSend
-              ? 'linear-gradient(135deg, #7C5CFC, #FF5E7D)'
+              ? 'var(--brand-primary)'
               : 'transparent',
             border: canSend
               ? 'none'
-              : '1.5px solid var(--border-subtle)',
+              : '1px solid var(--border-subtle)',
             display:        'flex',
             alignItems:     'center',
             justifyContent: 'center',
             cursor:    canSend ? 'pointer' : 'default',
-            transition: 'all 0.2s cubic-bezier(0.34,1.56,0.64,1)',
-            transform: canSend ? 'scale(1.04)' : 'scale(0.92)',
+            transition: 'background 0.18s ease, opacity 0.18s ease',
             opacity:   canSend ? 1 : 0.4,
-            boxShadow: canSend ? '0 4px 14px rgba(124,92,252,0.4)' : 'none',
+            boxShadow: 'none',
           }}
         >
           {sending ? (
