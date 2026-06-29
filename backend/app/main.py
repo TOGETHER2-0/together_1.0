@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import auth, events, users, avatar
 from app.db.database import engine, Base
+from app.core.config import settings
 
 # Prova a creare le tabelle, ma non fallire se il DB non è disponibile
 try:
@@ -14,7 +15,7 @@ app = FastAPI(title="Together - Jönköping University", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

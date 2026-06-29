@@ -3,7 +3,19 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 
-engine = create_engine(settings.DATABASE_URL)
+
+def _normalize_db_url(url: str) -> str:
+    # Managed MySQL providers often hand out a bare "mysql://" URL.
+    # SQLAlchemy needs the pymysql driver spelled out explicitly.
+    if url.startswith("mysql://"):
+        return "mysql+pymysql://" + url[len("mysql://"):]
+    return url
+
+
+engine = create_engine(
+    _normalize_db_url(settings.DATABASE_URL),
+    pool_pre_ping=True,  # avoid "MySQL server has gone away" on idle cloud DBs
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
