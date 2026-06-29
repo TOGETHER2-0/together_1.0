@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 from typing import List
+from datetime import datetime, timezone
 from app.db.database import get_db
 from app.schemas.event import EventCreate, EventOut, EventUpdate, JoinRequestOut, EventMessageOut, EventMessageCreate
 from app.models.event import Event, JoinRequest, RequestStatus, EventMessage
@@ -15,6 +16,11 @@ def build_event_out(event: Event) -> dict:
         **EventOut.model_validate(event).model_dump(),
         "approved_count": len(approved),
     }
+
+def _ensure_future(dt: datetime):
+    now = datetime.now(timezone.utc) if dt.tzinfo else datetime.utcnow()
+    if dt < now:
+        raise HTTPException(status_code=400, detail="Event date must be in the future")
 
 @router.get("", response_model=List[EventOut])
 def list_events(db: Session = Depends(get_db)):
@@ -40,6 +46,8 @@ def create_event(data: EventCreate, db: Session = Depends(get_db), current_user:
     if data.accommodation == "Odengatan 40" and data.floor is not None:
         if data.floor not in range(1, 5):
             raise HTTPException(status_code=400, detail="Floor must be 1–4 for Odengatan 40")
+
+    _ensure_future(data.event_datetime)
 
     event = Event(**data.model_dump(), host_id=current_user.id)
     db.add(event)
@@ -79,7 +87,23 @@ def update_event(event_id: int, data: EventUpdate, db: Session = Depends(get_db)
     if event.host_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized")
 
-    for field, value in data.model_dump(exclude_none=True).items():
+    update_data = data.model_dump(exclude_unset=True)
+
+    if "event_datetime" in update_data and update_data["event_datetime"] is not None:
+        _ensure_future(update_data["event_datetime"])
+
+    if "max_participants" in update_data and update_data["max_participants"] is not None:
+        approved_count = db.query(JoinRequest).filter(
+            JoinRequest.event_id == event_id,
+            JoinRequest.status == RequestStatus.approved
+        ).count()
+        if update_data["max_participants"] < approved_count:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Cannot set capacity below current approved participants ({approved_count})"
+            )
+
+    for field, value in update_data.items():
         setattr(event, field, value)
     db.commit()
     db.refresh(event)
@@ -124,7 +148,7 @@ def request_to_join(event_id: int, db: Session = Depends(get_db), current_user: 
         JoinRequest.event_id == event_id,
         JoinRequest.status == RequestStatus.approved
     ).count()
-    if approved_count >= event.max_participants:
+    if event.max_participants is not None and approved_count >= event.max_participants:
         raise HTTPException(status_code=400, detail="Event is full")
 
     req = JoinRequest(event_id=event_id, user_id=current_user.id)
@@ -157,7 +181,7 @@ def handle_request(
             JoinRequest.event_id == event_id,
             JoinRequest.status == RequestStatus.approved
         ).count()
-        if approved_count >= event.max_participants:
+        if event.max_participants is not None and approved_count >= event.max_participants:
             raise HTTPException(status_code=400, detail="Event is full")
         req.status = RequestStatus.approved
     elif action == "reject":
@@ -180,7 +204,6 @@ def get_event_messages(
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
 
-    # Controlla se l'utente è iscritto o è l'host
     is_host = event.host_id == current_user.id
     is_enrolled = db.query(JoinRequest).filter(
         JoinRequest.event_id == event_id,
@@ -216,7 +239,6 @@ def create_message(
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
 
-    # Controlla se l'utente è iscritto o è l'host
     is_host = event.host_id == current_user.id
     is_enrolled = db.query(JoinRequest).filter(
         JoinRequest.event_id == event_id,

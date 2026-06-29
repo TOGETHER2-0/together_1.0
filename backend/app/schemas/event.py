@@ -65,8 +65,3 @@ class EventMessageOut(BaseModel):
 
 class EventMessageCreate(BaseModel):
     text: str
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-    max_participants: Optional[int] = None
-    accommodation: Optional[str] = None
-    floor: Optional[int] = None
