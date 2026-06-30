@@ -10,26 +10,6 @@ import { Avatar } from '@/components/ui/Avatar';
 import AppShell from '@/components/layout/AppShell';
 import EventCard from '@/components/events/EventCard';
 
-/* ─── Category system — colors without text labels ───────────── */
-
-const CATEGORIES = [
-  { key: 'all',    label: 'all',    color: '#A78BFA' },
-  { key: 'music',  label: 'music',  color: '#A78BFA' },
-  { key: 'food',   label: 'food',   color: '#F472B6' },
-  { key: 'sport',  label: 'sport',  color: '#22D3EE' },
-  { key: 'art',    label: 'art',    color: '#FBBF24' },
-  { key: 'study',  label: 'study',  color: '#34D399' },
-  { key: 'other',  label: 'other',  color: '#94A3B8' },
-] as const;
-
-type CatKey = typeof CATEGORIES[number]['key'];
-
-function getCatColor(cat: string | null | undefined): string {
-  if (!cat) return '#94A3B8';
-  const m = CATEGORIES.find(c => c.key === cat.toLowerCase());
-  return m ? m.color : '#94A3B8';
-}
-
 /* ─── Time helpers ───────────────────────────────────────────── */
 
 function sectionFor(iso: string): 'tonight' | 'this week' | 'later' {
@@ -46,7 +26,6 @@ export default function DiscoverPage() {
   const [events, setEvents]   = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch]   = useState('');
-  const [activeCat, setActiveCat] = useState<CatKey>('all');
 
   useEffect(() => {
     eventsApi.list()
@@ -62,7 +41,6 @@ export default function DiscoverPage() {
 
   const q = search.trim().toLowerCase();
   const filtered = upcoming
-    .filter(e => activeCat === 'all' || (e.category ?? 'other').toLowerCase() === activeCat)
     .filter(e =>
       !q ||
       e.title.toLowerCase().includes(q) ||
@@ -70,7 +48,7 @@ export default function DiscoverPage() {
       (e.description ?? '').toLowerCase().includes(q)
     );
 
-  const searching = q.length > 0 || activeCat !== 'all';
+  const searching = q.length > 0;
   const spotlight = !searching && filtered.length > 0 ? filtered[0] : null;
   const feed      = spotlight ? filtered.slice(1) : filtered;
 
@@ -138,33 +116,7 @@ export default function DiscoverPage() {
           )}
         </div>
 
-        {/* ── Category canvas — the editorial lens ────────────── */}
-        <div style={{
-          display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none',
-          margin: '0 -20px', padding: '0 20px 14px',
-        } as React.CSSProperties}>
-          {CATEGORIES.map(cat => {
-            const active = activeCat === cat.key;
-            return (
-              <button
-                key={cat.key}
-                onClick={() => setActiveCat(cat.key)}
-                style={{
-                  flexShrink: 0, padding: '7px 16px', borderRadius: 999,
-                  fontSize: 13, fontWeight: active ? 700 : 500,
-                  fontFamily: 'var(--font-body)',
-                  cursor: 'pointer', transition: 'all 0.15s ease',
-                  background: active ? cat.color : 'rgba(255,255,255,0.05)',
-                  color: active ? '#09091A' : 'rgba(255,255,255,0.55)',
-                  border: active ? 'none' : '0.5px solid rgba(255,255,255,0.10)',
-                  letterSpacing: '-0.01em',
-                }}
-              >
-                {cat.label}
-              </button>
-            );
-          })}
-        </div>
+        <div style={{ height: 6 }} />
       </div>
 
       {/* ── Body ──────────────────────────────────────────────── */}
@@ -191,7 +143,7 @@ export default function DiscoverPage() {
                 {searching ? 'Nothing matches' : 'No events yet'}
               </p>
               <p style={{ fontSize: 13.5, color: 'var(--text-secondary)', lineHeight: 1.5, maxWidth: 230 }}>
-                {searching ? 'Try a different search or category' : 'Be the first to create one'}
+                {searching ? 'Try a different search' : 'Be the first to create one'}
               </p>
             </div>
             {!searching && (
