@@ -69,7 +69,10 @@ export function AvatarUpload({ currentUrl, name, onChange }: Props) {
       const form = new FormData();
       form.append('file', resized, 'avatar.jpg');
       const token = typeof window !== 'undefined' ? localStorage.getItem('together-token') : null;
-      const res = await fetch('/api/users/avatar', {
+      // Use the same backend base URL as the axios client. A bare relative path
+      // would hit the Vercel domain (no rewrite proxy anymore) and 404.
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || '';
+      const res = await fetch(`${apiBase}/api/users/avatar`, {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         body: form,
