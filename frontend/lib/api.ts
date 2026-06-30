@@ -1,20 +1,9 @@
 import axios from "axios";
 
 /*
-  FIX — baseURL vuoto.
-
-  Prima puntava direttamente all'URL ngrok del backend
-  (https://pardon-raffle-grip.ngrok-free.dev). Questo richiedeva
-  2 tunnel ngrok attivi simultaneamente (frontend + backend),
-  cosa che il piano free non permette (ERR_NGROK_334).
-
-  Ora il frontend chiama path RELATIVI (es. /api/auth/login).
-  Il browser li indirizza allo stesso dominio su cui sta navigando
-  (il dominio ngrok del frontend, porta 3000). next.config.js
-  intercetta quei path con un rewrite e li proxa internamente verso
-  http://localhost:8000, dove gira FastAPI.
-
-  Risultato: un solo tunnel ngrok necessario (quello del frontend).
+  baseURL = NEXT_PUBLIC_API_URL (l'URL pubblico del backend su Railway),
+  iniettato a build time da Vercel. I path delle chiamate iniziano con /api.
+  In locale, se la variabile non è settata, cade su "" (stesso dominio).
 */
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "",
